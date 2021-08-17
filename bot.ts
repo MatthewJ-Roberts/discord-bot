@@ -40,7 +40,7 @@ client.on("messageCreate", async (message) => {
         //If the user specified a location
         if (message.content.length > 8) {
             //Create the url by adding the user specified location to it
-            const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + message.content.slice(9) + "&appid=d044c73782d356d01f2ab9ece775d261";
+            const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + message.content.slice(9) + "&appid=" + process.env.WEATHER_TOKEN;
             //Gets the weather data and replies to the message
             const data = await fetchWeatherData(weatherUrl);
             message.reply(`The weather in ${message.content.slice(9)} is:\nActual temperature: ${Math.round(data.main.temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.main.feels_like - 273.15).toString()}°C`);
@@ -48,7 +48,7 @@ client.on("messageCreate", async (message) => {
         //If the user did not specify a location
         else {
             //Use Halifax's weather as the default
-            const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=Halifax&appid=d044c73782d356d01f2ab9ece775d261";
+            const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=Halifax&appid=" + process.env.WEATHER_TOKEN;
             //Gets the weather data and replies to the message
             const data = await fetchWeatherData(weatherUrl);
             message.reply(`The weather in Halifax is (default location):\nActual temperature: ${Math.round(data.main.temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.main.feels_like - 273.15).toString()}°C`);
