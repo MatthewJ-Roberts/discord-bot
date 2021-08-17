@@ -39,11 +39,17 @@ client.on("messageCreate", async (message) => {
 
         //If the user specified a location
         if (message.content.length > 8) {
-            //Create the url by adding the user specified location to it
-            const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + message.content.slice(9) + "&appid=" + process.env.WEATHER_TOKEN;
-            //Gets the weather data and replies to the message
-            const data = await fetchWeatherData(weatherUrl);
-            message.reply(`The weather in ${message.content.slice(9)} is:\nActual temperature: ${Math.round(data.main.temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.main.feels_like - 273.15).toString()}°C`);
+
+            if (message.content.toLowerCase().slice(9) === "fart") {
+                message.reply('Haha poopy fart');
+            } else {
+                //Create the url by adding the user specified location to it
+                const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + message.content.slice(9) + "&appid=" + process.env.WEATHER_TOKEN;
+                //Gets the weather data and replies to the message
+                const data = await fetchWeatherData(weatherUrl);
+                message.reply(`The weather in ${message.content.slice(9)} is:\nActual temperature: ${Math.round(data.main.temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.main.feels_like - 273.15).toString()}°C`);
+            }
+            
         }
         //If the user did not specify a location
         else {
