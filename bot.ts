@@ -1,7 +1,7 @@
 //Importing a module that hides tokens
 import dotenv from "dotenv";
 //Importing a module for discord functionality
-import {Client, Intents, Message, MessageEmbed} from 'discord.js';
+import {Client, Intents, MessageEmbed} from 'discord.js';
 //Importing a module for better get/push requests
 import axios from "axios";
 //Loading up the token hider
@@ -58,7 +58,7 @@ client.on("messageCreate", async (message) => {
     //Error handler
     try{
         //If the message contains '!anime'
-        if (message.content.toLocaleLowerCase().includes("!anime")) {
+        if (message.content.toLowerCase().includes("!anime")) {
             //Gets the anime's data
             const data = await graphqlGet(message.content.slice(7));
             //Create an array to store the studios responsible for animation
