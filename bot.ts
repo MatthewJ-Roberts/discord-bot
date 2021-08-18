@@ -95,14 +95,25 @@ async function weatherTimeCommand(message: Message) {
 
     //Error handler
     try {
-                    
+        const userWords = message.content.split(' ');
         //Create the url by adding the user specified location to it
-        const weatherUrlCoords = "https://api.openweathermap.org/data/2.5/weather?q=" + message.content.split(' ')[1] + "&appid=" + process.env.WEATHER_TOKEN;
+        const weatherUrlCoords = "https://api.openweathermap.org/data/2.5/weather?q=" + userWords[1] + "&appid=" + process.env.WEATHER_TOKEN;
         //Gets the weather data and replies to the message
         const temp = await fetchWeatherData(weatherUrlCoords);
         const weatherUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${temp.coord.lat}&lon=${temp.coord.lon}&appid=${process.env.WEATHER_TOKEN}`;
         const data = await fetchWeatherData(weatherUrl);
-        console.log(data);
+        const d = new Date();
+        const hours = Number(userWords[2]) - d.getHours();
+        const unixTime = Math.round(d.getTime() / 1000) + (hours * 3600);
+
+        for (let i = 0; i < data.hourly.length; i ++) {
+
+            if (data.hourly[i].dt === unixTime) {
+                message.reply(`The weather in ${message.content.slice(9)} in ${userWords[2]} hours will be:\nActual temperature: ${Math.round(data.hourly[i].temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.hourly[i].feels_like - 273.15).toString()}°C`);
+                break;
+            }
+
+        }
 
     //If an error was thrown
     } catch(err) {
