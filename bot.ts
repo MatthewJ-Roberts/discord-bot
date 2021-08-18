@@ -109,7 +109,7 @@ async function weatherTimeCommand(message: Message) {
         for (let i = 0; i < data.hourly.length; i ++) {
 
             if (data.hourly[i].dt >= unixTime) {
-                message.reply(`The weather in ${message.content.slice(9)} in ${userWords[2]} hours will be:\nActual temperature: ${Math.round(data.hourly[i].temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.hourly[i].feels_like - 273.15).toString()}°C`);
+                message.reply(`The weather in ${userWords[1]} at ${userWords[2]} will be:\nActual temperature: ${Math.round(data.hourly[i].temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.hourly[i].feels_like - 273.15).toString()}°C`);
                 break;
             }
 
