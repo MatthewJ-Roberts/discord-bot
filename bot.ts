@@ -35,59 +35,17 @@ client.on("messageCreate", async (message) => {
     }
 
     //If the message contains '!weather'
-    if (message.content.toLowerCase().includes("!weather")) {
+    else if (message.content.toLowerCase().includes("!weather")) {
 
         weatherCommand(message);
 
     }
     
-    //Error handler
-    try{
-        //If the message contains '!anime'
-        if (message.content.toLowerCase().includes("!anime")) {
-            //Gets the anime's data
-            const data = await graphqlGet(message.content.slice(7));
-            //Create an array to store the studios responsible for animation
-            const studios = [];
-            //Loop through the list of studios
-            for (let i = 0; i < data.studios.nodes.length; i ++) {
-                //If the studio is classified as an animation studio (could be a producer or other studios)
-                if (data.studios.nodes[i].isAnimationStudio) {
-                    //Add it to the array
-                    studios.push(data.studios.nodes[i].name);
-                }
-            }
-            //Remove the html characters from the anime's synopsis
-            const desc = data.description.toString().replace(/<.+?>/g, "")
-            //Creating a discord embed
-            const exampleEmbed = new MessageEmbed()
-                //Setting the colour of the sidebar to match the image's
-                .setColor(data.coverImage.color.toString())
-                //Setting the title
-                .setTitle(data.title.english.toString())
-                //Linking the title to the original web page
-                .setURL('https://anilist.co/anime/' + data.id.toString())
-                //Setting the description
-                .setDescription(desc)
-                //Adding various fields to display information
-                .addFields(
-                    { name: 'Rating', value: data.averageScore.toString() + "%", inline: true },
-                    { name: 'Episodes', value: data.episodes.toString(), inline: true },
-                    { name: 'Studio(s)', value: studios.join(), inline: true },
-                    { name: '\u200B', value: '\u200B' },
-                    { name: 'Genres', value: data.genres.toString(), inline: true },
-                    { name: 'Aired', value: data.seasonYear.toString(), inline: true },
-                    { name: 'Source', value: data.source.toString(), inline: true },
-                )
-                //Setting the cover image (extra large was the biggest option and looked the best)
-                .setImage(data.coverImage.extraLarge)
-            //Replying to the original message
-            message.reply({ embeds: [exampleEmbed] });
-        }
-    //If an error was thrown
-    } catch(err) {
-        //Reply to the message claiming the anime was not found
-        message.reply("Anime not found");
+    //If the message contains '!anime'
+    else if (message.content.toLowerCase().includes("!anime")) {
+        
+        animeCommand(message);
+
     }
 
 });
@@ -127,6 +85,56 @@ async function weatherCommand(message: Message) {
         message.reply("Location not found");
     }
     
+}
+
+async function animeCommand(message: Message) {
+
+    //Error handler
+    try{
+        //Gets the anime's data
+        const data = await graphqlGet(message.content.slice(7));
+        //Create an array to store the studios responsible for animation
+        const studios = [];
+        //Loop through the list of studios
+        for (let i = 0; i < data.studios.nodes.length; i ++) {
+            //If the studio is classified as an animation studio (could be a producer or other studios)
+            if (data.studios.nodes[i].isAnimationStudio) {
+                //Add it to the array
+                studios.push(data.studios.nodes[i].name);
+            }
+        }
+        //Remove the html characters from the anime's synopsis
+        const desc = data.description.toString().replace(/<.+?>/g, "")
+        //Creating a discord embed
+        const exampleEmbed = new MessageEmbed()
+            //Setting the colour of the sidebar to match the image's
+            .setColor(data.coverImage.color.toString())
+            //Setting the title
+            .setTitle(data.title.english.toString())
+            //Linking the title to the original web page
+            .setURL('https://anilist.co/anime/' + data.id.toString())
+            //Setting the description
+            .setDescription(desc)
+            //Adding various fields to display information
+            .addFields(
+                { name: 'Rating', value: data.averageScore.toString() + "%", inline: true },
+                { name: 'Episodes', value: data.episodes.toString(), inline: true },
+                { name: 'Studio(s)', value: studios.join(), inline: true },
+                { name: '\u200B', value: '\u200B' },
+                { name: 'Genres', value: data.genres.toString(), inline: true },
+                { name: 'Aired', value: data.seasonYear.toString(), inline: true },
+                { name: 'Source', value: data.source.toString(), inline: true },
+            )
+            //Setting the cover image (extra large was the biggest option and looked the best)
+            .setImage(data.coverImage.extraLarge)
+        //Replying to the original message
+        message.reply({ embeds: [exampleEmbed] });
+    //If an error was thrown
+    } catch(err) {
+        //Reply to the message claiming the anime was not found
+        message.reply("Anime not found");
+    }
+
 }
 
 fetchWeatherData("https://api.openweathermap.org/data/2.5/weather?q=Halifax&appid=" + process.env.WEATHER_TOKEN);
