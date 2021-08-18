@@ -96,7 +96,7 @@ async function weatherTimeCommand(message: Message) {
     //Error handler
     try {
         const userWords = message.content.split(' ');
-        if (Number(userWords[2]) % 1 != 0 || Number(userWords[2]) > 24 || Number(userWords[2]) < 0) {
+        if (Number(userWords[2]) % 1 != 0 || Number(userWords[2]) > 24 || Number(userWords[2]) < 1) {
             message.reply("Invalid time");
             return;
         }
