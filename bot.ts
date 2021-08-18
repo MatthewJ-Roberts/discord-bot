@@ -105,11 +105,18 @@ async function weatherTimeCommand(message: Message) {
         const d = new Date();
         const hours = Number(userWords[2]) - d.getHours();
         const unixTime = Math.round(d.getTime() / 1000) + (hours * 3600);
+        var niceTime = ""
 
+        if (Number(userWords[2]) > 12) {
+            niceTime = Number(userWords[2]) - 12 + "pm";
+        } else {
+            niceTime = userWords[2] + "am";
+        }
+        
         for (let i = 0; i < data.hourly.length; i ++) {
 
             if (data.hourly[i].dt >= unixTime) {
-                message.reply(`The weather in ${userWords[1]} at ${userWords[2]} will be:\nActual temperature: ${Math.round(data.hourly[i].temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.hourly[i].feels_like - 273.15).toString()}°C`);
+                message.reply(`The weather in ${userWords[1]} at ${niceTime} will be:\nActual temperature: ${Math.round(data.hourly[i].temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.hourly[i].feels_like - 273.15).toString()}°C`);
                 break;
             }
 
