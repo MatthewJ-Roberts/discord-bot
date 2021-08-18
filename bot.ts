@@ -37,12 +37,12 @@ client.on("messageCreate", async (message) => {
     //If the message contains '!weather'
     else if (message.content.toLowerCase().startsWith("!weather")) {
 
-        weatherCommand(message);
+        if ((message.content.match(/ /g) || []).length < 2) {
+            weatherCommand(message);
+        } else {
+            message.reply("Weather time option currently unavailable");
+        }
 
-    }
-
-    else if (message.content.toLowerCase().startsWith("!weatherTime")) {
-        message.reply("Time specific weather currently unavailable");
     }
     
     //If the message contains '!anime'
