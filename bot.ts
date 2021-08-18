@@ -40,7 +40,7 @@ client.on("messageCreate", async (message) => {
         if ((message.content.match(/ /g) || []).length < 2) {
             weatherCommand(message);
         } else {
-            message.reply("Weather time option currently unavailable");
+            weatherTimeCommand(message);
         }
 
     }
@@ -82,6 +82,27 @@ async function weatherCommand(message: Message) {
             const data = await fetchWeatherData(weatherUrl);
             message.reply(`The weather in Halifax is (default location):\nActual temperature: ${Math.round(data.main.temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.main.feels_like - 273.15).toString()}°C`);
         }
+
+    //If an error was thrown
+    } catch(err) {
+        //Reply to the message claiming the location was not found
+        message.reply("Location not found");
+    }
+    
+}
+
+async function weatherTimeCommand(message: Message) {
+
+    //Error handler
+    try {
+                    
+        //Create the url by adding the user specified location to it
+        const weatherUrlCoords = "https://api.openweathermap.org/data/2.5/weather?q=" + message.content.split(' ')[1] + "&appid=" + process.env.WEATHER_TOKEN;
+        //Gets the weather data and replies to the message
+        const temp = await fetchWeatherData(weatherUrlCoords);
+        const weatherUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${temp.coord.lat}&lon=${temp.coord.lon}&appid=${process.env.WEATHER_TOKEN}`;
+        const data = await fetchWeatherData(weatherUrl);
+        console.log(data);
 
     //If an error was thrown
     } catch(err) {
@@ -141,7 +162,6 @@ async function animeCommand(message: Message) {
 
 }
 
-fetchWeatherData("https://api.openweathermap.org/data/2.5/weather?q=Halifax&appid=" + process.env.WEATHER_TOKEN);
 
 //Function is asynchronous as we must wait for the website to respond (alternative is polling, not very effective)
 async function fetchWeatherData(weatherUrl) {
