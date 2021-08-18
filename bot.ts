@@ -1,7 +1,7 @@
 //Importing a module that hides tokens
 import dotenv from "dotenv";
 //Importing a module for discord functionality
-import {Client, Intents, MessageEmbed} from 'discord.js';
+import {Client, Intents, Message, MessageEmbed} from 'discord.js';
 //Importing a module for better get/push requests
 import axios from "axios";
 //Loading up the token hider
@@ -38,30 +38,7 @@ client.on("messageCreate", async (message) => {
         //If the message contains '!weather'
         if (message.content.toLowerCase().includes("!weather")) {
 
-            //If the user specified a location
-            if (message.content.length > 8) {
-                
-                //Joke if statement
-                if (message.content.toLowerCase().slice(9) === "fart") {
-                    message.reply('Haha poopy fart');
-                //Actual logic
-                } else {
-                    //Create the url by adding the user specified location to it
-                    const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + message.content.slice(9) + "&appid=" + process.env.WEATHER_TOKEN;
-                    //Gets the weather data and replies to the message
-                    const data = await fetchWeatherData(weatherUrl);
-                    message.reply(`The weather in ${message.content.slice(9)} is:\nActual temperature: ${Math.round(data.main.temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.main.feels_like - 273.15).toString()}°C`);
-                }
-                
-            }
-            //If the user did not specify a location
-            else {
-                //Use Halifax's weather as the default
-                const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=Halifax&appid=" + process.env.WEATHER_TOKEN;
-                //Gets the weather data and replies to the message
-                const data = await fetchWeatherData(weatherUrl);
-                message.reply(`The weather in Halifax is (default location):\nActual temperature: ${Math.round(data.main.temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.main.feels_like - 273.15).toString()}°C`);
-            }
+            weatherCommand(message);
 
         }
     //If an error was thrown
@@ -121,10 +98,42 @@ client.on("messageCreate", async (message) => {
 
 });
 
+async function weatherCommand(message: Message) {
+
+    //If the user specified a location
+    if (message.content.length > 8) {
+                
+        //Joke if statement
+        if (message.content.toLowerCase().slice(9) === "fart") {
+            message.reply('Haha poopy fart');
+        //Actual logic
+        } else {
+            //Create the url by adding the user specified location to it
+            const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + message.content.slice(9) + "&appid=" + process.env.WEATHER_TOKEN;
+            //Gets the weather data and replies to the message
+            const data = await fetchWeatherData(weatherUrl);
+            message.reply(`The weather in ${message.content.slice(9)} is:\nActual temperature: ${Math.round(data.main.temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.main.feels_like - 273.15).toString()}°C`);
+        }
+    
+    }
+    //If the user did not specify a location
+    else {
+        //Use Halifax's weather as the default
+        const weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=Halifax&appid=" + process.env.WEATHER_TOKEN;
+        //Gets the weather data and replies to the message
+        const data = await fetchWeatherData(weatherUrl);
+        message.reply(`The weather in Halifax is (default location):\nActual temperature: ${Math.round(data.main.temp - 273.15).toString()}°C\nFeels like: ${Math.round(data.main.feels_like - 273.15).toString()}°C`);
+    }
+
+}
+
+fetchWeatherData("https://api.openweathermap.org/data/2.5/weather?q=Halifax&appid=" + process.env.WEATHER_TOKEN);
+
 //Function is asynchronous as we must wait for the website to respond (alternative is polling, not very effective)
 async function fetchWeatherData(weatherUrl) {
     //Await waits for server response, get requests need time
     const response = await axios.get(weatherUrl);
+    console.log(response.data.coord);
     return response.data;
 }
 
@@ -161,7 +170,7 @@ query ($search: String) { # Define which variables will be used in the query
 `;
 
 //Defining a function that creates the 'search: target' style constant
-//I doubt it is required to do it this way but I couldn't get it to work with a variable input otherwise
+//I doubt that it's required to do it this way but I couldn't get it to work with a variable input otherwise
 function variables(target) {
     const temp = {
         search: target
