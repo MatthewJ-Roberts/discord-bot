@@ -96,6 +96,10 @@ async function weatherTimeCommand(message: Message) {
     //Error handler
     try {
         const userWords = message.content.split(' ');
+        if (Number(userWords[2]) % 1 != 0 || Number(userWords[2]) > 24 || Number(userWords[2]) < 0) {
+            message.reply("Invalid time");
+            return;
+        }
         //Create the url by adding the user specified location to it
         const weatherUrlCoords = "https://api.openweathermap.org/data/2.5/weather?q=" + userWords[1] + "&appid=" + process.env.WEATHER_TOKEN;
         //Gets the weather data and replies to the message
@@ -105,7 +109,7 @@ async function weatherTimeCommand(message: Message) {
         const d = new Date();
         const hours = Number(userWords[2]) - d.getHours();
         const unixTime = Math.round(d.getTime() / 1000) + (hours * 3600);
-        var niceTime = ""
+        var niceTime = "";
 
         if (Number(userWords[2]) > 12) {
             niceTime = Number(userWords[2]) - 12 + "pm";
