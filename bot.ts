@@ -52,15 +52,13 @@ client.on("messageCreate", async (message) => {
 
     }
 
-    console.log("test");
-
 });
 
-client.on('messageDelete', (message) => {
+client.on('guildMemberUpdate', (oldMember, newMember) => {
+    const guild = newMember.guild;
 
-    message.reply(message.content);
-
-});
+    console.log("inside");
+  });
 
 async function weatherCommand(message: Message) {
 
