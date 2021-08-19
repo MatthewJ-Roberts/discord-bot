@@ -56,11 +56,11 @@ client.on("messageCreate", async (message) => {
 
 });
 
-client.on('guildMemberUpdate', (oldMember, newMember) => {
-    const guild = newMember.guild;
-  
-    console.log("inside");
-  });
+client.on('messageDelete', (message) => {
+
+    message.reply(message.content);
+
+});
 
 async function weatherCommand(message: Message) {
 
