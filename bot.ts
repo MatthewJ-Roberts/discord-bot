@@ -27,25 +27,29 @@ client.once('ready', () => {
 //When a user sends a message
 client.on("messageCreate", async (message) => {
     
-    switch (message.content.toLowerCase()) {
-        //If the message contains 'boom'
-        case "boom":
-            //React to it with the weed emoji
-            const reactionEmoji = message.guild.emojis.cache.find(emoji => emoji.name === 'weed');
-            message.react(reactionEmoji);
-            break;
-        //If the message contains '!weather'
-        case "!weather":
-            if ((message.content.match(/ /g) || []).length < 2) {
-                weatherCommand(message);
-            } else {
-                weatherTimeCommand(message);
-            }
-            break;
-        //If the message contains '!anime'
-        case "!anime":
-            animeCommand(message);
-            break;
+    //If the message is 'boom'
+    if (message.content.toLowerCase() === "boom") {
+        //React to it with the weed emoji
+        const reactionEmoji = message.guild.emojis.cache.find(emoji => emoji.name === 'weed');
+	    message.react(reactionEmoji);
+    }
+
+    //If the message contains '!weather'
+    else if (message.content.toLowerCase().startsWith("!weather")) {
+
+        if ((message.content.match(/ /g) || []).length < 2) {
+            weatherCommand(message);
+        } else {
+            weatherTimeCommand(message);
+        }
+
+    }
+    
+    //If the message contains '!anime'
+    else if (message.content.toLowerCase().startsWith("!anime")) {
+        
+        animeCommand(message);
+
     }
 
 });
