@@ -172,7 +172,7 @@ async function animeCommand(message: Message) {
             .addFields(
                 { name: 'Rating', value: data.averageScore.toString() + "%", inline: true },
                 { name: 'Episodes', value: data.episodes.toString(), inline: true },
-                { name: 'Studio(s)', value: studios.join(), inline: true },
+                { name: 'Studio(s)', value: studios.toString(), inline: true },
                 { name: '\u200B', value: '\u200B' },
                 { name: 'Genres', value: data.genres.toString(), inline: true },
                 { name: 'Aired', value: data.seasonYear.toString(), inline: true },
