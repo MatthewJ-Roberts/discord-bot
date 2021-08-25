@@ -121,7 +121,7 @@ async function weatherTimeCommand(message: Message) {
         const d = new Date();
         const hours = Number(userWords[2]) - d.getHours();
         const unixTime = Math.round(d.getTime() / 1000) + (hours * 3600);
-        var niceTime = "";
+        let niceTime = "";
 
         if (Number(userWords[2]) > 12) {
             niceTime = Number(userWords[2]) - 12 + "pm";
@@ -204,7 +204,7 @@ async function animeRandomCommand(message: Message) {
         //Making an array of the number of pages between the min and max
         const arrValues = makeArray(1, temp.pageInfo.lastPage);
         //Loop through the pages of anime with the passed genre until a valid anime is found (no nulls present)
-        var i = arrValues.length,
+        let i = arrValues.length,
             j = 0,
             old;
         //Source: https://newbedev.com/generating-non-repeating-random-numbers-in-js
