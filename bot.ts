@@ -201,12 +201,30 @@ async function animeRandomCommand(message: Message) {
     try {
         //Gets the anime's data
         const temp = await genreGraphQL(message.content.slice(14), 1);
-        while (true) {
-            var data = await genreGraphQL(message.content.slice(14), Math.floor(Math.random() * temp.pageInfo.lastPage))
+        //Making an array of the number of pages between the min and max
+        const arrValues = makeArray(1, temp.pageInfo.lastPage);
+        //Loop through the pages of anime with the passed genre until a valid anime is found (no nulls present)
+        var i = arrValues.length,
+            j = 0,
+            old;
+        //Source: https://newbedev.com/generating-non-repeating-random-numbers-in-js
+        //Modified version of the function from this link
+        //Officially known as the "Fisher–Yates Shuffle", basically an efficient way to generate random non-repeating numbers
+        while (i--) {
+
+            j = Math.floor(Math.random() * (i+1));
+            //Fetching a random anime
+            var data = await genreGraphQL(message.content.slice(14), j);
             if (data.media[0].title.english && data.media[0].episodes && data.media[0].averageScore && data.media[0].seasonYear && data.media[0].source && 
                 data.media[0].description && data.media[0].coverImage.color) {
                 break;
             }
+    
+            // swap randomly chosen element with current element
+            old = arrValues[i];
+            arrValues[i] = arrValues[j];
+            arrValues[j] = old;
+    
         }
 
         //Create an array to store the studios responsible for animation
@@ -250,6 +268,17 @@ async function animeRandomCommand(message: Message) {
         message.reply("Invalid anime genre/command");
     }
 
+}
+
+//Source: https://stackoverflow.com/questions/22476258/create-an-array-with-all-numbers-from-min-to-max-without-a-loop
+//Fancy recursive function that populates an array based on its min and max values
+function makeArray(low,hi){
+    function rangeRec(low, hi, vals) {
+       if(low > hi) return vals;
+       vals.push(low);
+       return rangeRec(low+1,hi,vals);
+    }
+    return rangeRec(low,hi,[]);
 }
 
 //Function is asynchronous as we must wait for the website to respond (alternative is polling, not very effective)
