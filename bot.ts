@@ -36,7 +36,8 @@ client.on("messageCreate", async (message) => {
 
     //If the message contains '!weather'
     else if (message.content.toLowerCase().startsWith("!weather")) {
-
+        
+        //Counting the number of spaces
         if ((message.content.match(/ /g) || []).length < 2) {
             weatherCommand(message);
         } else {
@@ -47,8 +48,13 @@ client.on("messageCreate", async (message) => {
     
     //If the message contains '!anime'
     else if (message.content.toLowerCase().startsWith("!anime")) {
-        
-        animeCommand(message);
+        const input = message.content.toLowerCase().split(' ');
+        //Counting the number of spaces
+        if (input[1] != "random") {
+            animeCommand(message);
+        } else {
+            animeRandomCommand(message);
+        }
 
     }
 
@@ -145,7 +151,7 @@ async function animeCommand(message: Message) {
     //Error handler
     try{
         //Gets the anime's data
-        const data = await graphqlGet(message.content.slice(7));
+        const data = await searchGraphQL(message.content.slice(7));
         //Create an array to store the studios responsible for animation
         const studios = [];
         //Loop through the list of studios
@@ -157,7 +163,7 @@ async function animeCommand(message: Message) {
             }
         }
         //Remove the html characters from the anime's synopsis
-        const desc = data.description.toString().replace(/<.+?>/g, "")
+        const desc = data.description.toString().replace(/<.+?>/g, "");
         //Creating a discord embed
         const exampleEmbed = new MessageEmbed()
             //Setting the colour of the sidebar to match the image's
@@ -190,6 +196,55 @@ async function animeCommand(message: Message) {
 
 }
 
+async function animeRandomCommand(message: Message) {
+
+    try {
+        //Gets the anime's data
+        const temp = await genreGraphQL(message.content.slice(14), 1);
+        const data = await genreGraphQL(message.content.slice(14), Math.floor(Math.random() * temp.pageInfo.lastPage))
+        //Create an array to store the studios responsible for animation
+        console.log(data.media[0]);
+        const studios = [];
+        //Loop through the list of studios
+        for (let i = 0; i < data.media[0].studios.nodes.length; i ++) {
+            //If the studio is classified as an animation studio (could be a producer or other studios)
+            if (data.media[0].studios.nodes[i].isAnimationStudio) {
+                //Add it to the array
+                studios.push(data.media[0].studios.nodes[i].name);
+            }
+        }
+        //Remove the html characters from the anime's synopsis
+        const desc = data.media[0].description.toString().replace(/<.+?>/g, "");
+        //Creating a discord embed
+        const exampleEmbed = new MessageEmbed()
+            //Setting the colour of the sidebar to match the image's
+            .setColor(data.media[0].coverImage.color.toString())
+            //Setting the title
+            .setTitle(data.media[0].title.english.toString())
+            //Linking the title to the original web page
+            .setURL('https://anilist.co/anime/' + data.media[0].id.toString())
+            //Setting the description
+            .setDescription(desc)
+            //Adding various fields to display information
+            .addFields(
+                { name: 'Rating', value: data.media[0].averageScore.toString() + "%", inline: true },
+                { name: 'Episodes', value: data.media[0].episodes.toString(), inline: true },
+                { name: 'Studio(s)', value: studios.toString(), inline: true },
+                { name: '\u200B', value: '\u200B' },
+                { name: 'Genres', value: data.media[0].genres.toString(), inline: true },
+                { name: 'Aired', value: data.media[0].seasonYear.toString(), inline: true },
+                { name: 'Source', value: data.media[0].source.toString(), inline: true },
+            )
+            //Setting the cover image (extra large was the biggest option and looked the best)
+            .setImage(data.media[0].coverImage.extraLarge)
+        //Replying to the original message
+        message.reply({ embeds: [exampleEmbed] });
+    } catch(err) {
+        //Error handler
+        message.reply("Invalid anime genre/command");
+    }
+
+}
 
 //Function is asynchronous as we must wait for the website to respond (alternative is polling, not very effective)
 async function fetchWeatherData(weatherUrl) {
@@ -203,48 +258,101 @@ client.login(process.env.DISCORD_TOKEN);
 
 //A bunch of gibberish --> it's just a different style of a MySQL query
 //Gets all the media information regarding the user specified title
-const query = `
+const searchQuery = `
 query ($search: String) { # Define which variables will be used in the query
     Media (search: $search, type: ANIME) { # Insert our variables into the query arguments
-      title {
-          english
-      }
-      episodes
-      genres
-      averageScore
-      seasonYear
-      source
-      description
-      id
-      coverImage {
-        extraLarge
-        color
-      }
-      studios {
-        nodes {
-            name
-            isAnimationStudio
+        title {
+            english
         }
-      }
+        episodes
+        genres
+        averageScore
+        seasonYear
+        source
+        description
+        id
+        coverImage {
+            extraLarge
+            color
+        }
+        studios {
+            nodes {
+                name
+                isAnimationStudio
+            }
+        }
     }
-  }
+}
+`;
+
+//Gets all the media information regarding the user specified title
+const genreQuery = `
+query ($genre: String, $page: Int) { # Define which variables will be used in the query
+    Page (page: $page, perPage: 1) {
+        pageInfo {
+            currentPage
+            lastPage
+        }
+        media (genre: $genre, type: ANIME) { # Insert our variables into the query arguments
+            title {
+                english
+            }
+            episodes
+            genres
+            averageScore
+            seasonYear
+            source
+            description
+            id
+            coverImage {
+                extraLarge
+                color
+            }
+            studios {
+                nodes {
+                    name
+                    isAnimationStudio
+                }
+            }
+        }
+    }
+}
 `;
 
 //Defining a function that creates the 'search: target' style constant
 //I doubt that it's required to do it this way but I couldn't get it to work with a variable input otherwise
-function variables(target) {
+function searchVariables(target) {
     const temp = {
         search: target
     };
     return temp
 }
 
+//Defining a function that creates the 'search: target' style constant
+function genreVariables(genreTarget, pageTarget) {
+    const temp = {
+        genre: genreTarget,
+        page: pageTarget
+    };
+    return temp
+}
+
 //Gets the anime (graphql was the database the website used)
-async function graphqlGet(target) {
+async function searchGraphQL(target) {
     //Sends a post request (typically a get request but graphql works differently) with the query information as well as the target anime
     const anime = await axios.post("https://graphql.anilist.co", {
-        query: query,
-        variables: variables(target),
+        query: searchQuery,
+        variables: searchVariables(target),
     });
-    return anime.data.data.Media
+    return anime.data.data.Media;
+}
+
+//Gets the anime (graphql was the database the website used)
+async function genreGraphQL(genreTarget, pageTarget) {
+    //Sends a post request (typically a get request but graphql works differently) with the query information as well as the target anime
+    const anime = await axios.post("https://graphql.anilist.co", {
+        query: genreQuery,
+        variables: genreVariables(genreTarget, pageTarget),
+    });
+    return anime.data.data.Page;
 }
