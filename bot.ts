@@ -201,9 +201,15 @@ async function animeRandomCommand(message: Message) {
     try {
         //Gets the anime's data
         const temp = await genreGraphQL(message.content.slice(14), 1);
-        const data = await genreGraphQL(message.content.slice(14), Math.floor(Math.random() * temp.pageInfo.lastPage))
+        while (true) {
+            var data = await genreGraphQL(message.content.slice(14), Math.floor(Math.random() * temp.pageInfo.lastPage))
+            if (data.media[0].title.english && data.media[0].episodes && data.media[0].averageScore && data.media[0].seasonYear && data.media[0].source && 
+                data.media[0].description && data.media[0].coverImage.color) {
+                break;
+            }
+        }
+
         //Create an array to store the studios responsible for animation
-        console.log(data.media[0]);
         const studios = [];
         //Loop through the list of studios
         for (let i = 0; i < data.media[0].studios.nodes.length; i ++) {
